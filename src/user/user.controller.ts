@@ -9,7 +9,7 @@ export class UserController {
 
   @Post() // POST /user
   create(@Body() createUserDto: Prisma.UserCreateInput) {
-    return this.userService.create(createUserDto);
+    return this.userService.createUser(createUserDto);
   }
 
   @Get() // GET /user
