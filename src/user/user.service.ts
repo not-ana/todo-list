@@ -51,45 +51,45 @@ export class UserService {
   }
   */
 
-    async createUser(data: CreateUserDto): Promise<User> {
-      const hashedPassword = await bcrypt.hash(data.password, 10);
-      return this.databaseService.user.create({
-        data: {
-          ...data,
-          password: hashedPassword,
-        },
-      });
-    }
-
-    async findUserByEmail(email: string): Promise<User | null> {
-      return this.databaseService.user.findUnique({
-        where: { email },
-      });
-    }
-
-
-  async findAll() {
-    return this.databaseService.user.findMany() 
+  async createUser(data: CreateUserDto): Promise<User> {
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    return this.databaseService.user.create({
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
+    });
   }
 
-  async findOne(id: number){
-    return this.databaseService.user.findUnique({where: {id}})
+  async findUserByEmail(email: string): Promise<User | null> {
+    return await this.databaseService.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async findAll() {
+    return this.databaseService.user.findMany();
+  }
+
+  async findOne(id: number) {
+    return await this.databaseService.user.findUnique({ where: { id } });
   }
 
   async findOneByEmail(email: string) {
-    return this.databaseService.user.findUnique({ where: { email } });
+    return await this.databaseService.user.findUnique({ where: { email } });
   }
 
   async update(id: number, updateUserDto: Prisma.UserUpdateInput) {
-    return this.databaseService.user.update({where: {id}, data: updateUserDto})
+    return this.databaseService.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
   }
 
   async remove(id: number) {
-    return this.databaseService.user.delete({where: {id}})
+    return this.databaseService.user.delete({ where: { id } });
   }
 }
-
-
 
 /*
 import { Injectable } from '@nestjs/common';

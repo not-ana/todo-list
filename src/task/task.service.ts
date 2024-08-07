@@ -1,110 +1,63 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 
-
 @Injectable()
 export class TaskService {
-    constructor(private readonly databaseService: DatabaseService) {}
-    
-    /*
-    private tasks = [
-        {
-            "id": 1,
-            "description": "Integração com API",
-            "isCompleted": true,
-        },
-        {
-            "id": 2,
-            "description": "Definição da linguagem para backend",
-            "isCompleted": false,
-        },
-        {
-            "id": 3,
-            "description": "Definição da linguagem para frontend",
-            "isCompleted": true,
-        },
-        {
-            "id": 4,
-            "description": "Definição do banco de dados",
-            "isCompleted": false,
-        }
-    ]
-    */
+  @Inject()
+  private readonly databaseService: DatabaseService;
 
-    async findAll() {
-        return this.databaseService.task.findMany()
-    }
-
-    /*
-    findOne(title: string) {
-        const task = this.tasks.find(task => task.title === title)
-
-        return task
-    }
-    */
-
-/*
-    async findOne(id: number){
-        const task = this.tasks.find(task => task.id === id)
-        
-        if (!task) throw new NotFoundException('Tarefa não encontrada')
-
-        return task
-    }
-*/
-
-    async findOne(id: number) {
-    return this.databaseService.task.findUnique({where: {id}})
+  async findAll(userId: number) {
+    return await this.databaseService.task.findMany({ where: { userId } });
   }
 
-    /*
-    async create(createTaskDto: Prisma.TaskCreateInput) {
-        const tasksByHightestId = [...this.tasks].sort((a,b) => b.id = a.id)
-        const newTask = {
-            id: tasksByHightestId[0].id + 1,
-            ...createTaskDto
-        }
-        this.tasks.push(newTask)
-        return newTask
+  async findOne(id: number) {
+    if (!id) {
+      throw new Error('Task ID is required');
     }
-
-  */  
-
-    async create(createTaskDto: Prisma.TaskCreateInput) {
-        return this.databaseService.task.create({
-          data: createTaskDto
-        })
+    const result = await this.databaseService.task.findUnique({
+      where: { id },
+    });
+    if (!result) {
+      throw new NotFoundException('Task not found');
     }
+    return result;
+  }
 
-/*
-    async update(id: number, updateTaskDto: UpdateTaskDto) {
-        this.tasks = this.tasks.map(task => {
-            if (task.id === id){
-                return { ...task, ...updateTaskDto }
-            }
-            return task
-        })
+  async create(createTaskDto: Prisma.TaskCreateInput, userId: number) {
+    const newTask = {
+      description: createTaskDto.description,
+      isCompleted: createTaskDto.isCompleted,
+      user: { connect: { id: userId } },
+    };
+    return await this.databaseService.task.create({ data: newTask });
+  }
 
-        return this.findOne(id)
+  async update(id: number, updateTaskDto: Prisma.TaskUpdateInput) {
+    try {
+      const result = await this.databaseService.task.update({
+        where: { id },
+        data: updateTaskDto,
+      });
+      return result;
+    } catch (error) {
+      throw new BadRequestException('Error updating task');
     }
+  }
 
-*/
-    async update(id: number, updateTaskDto: Prisma.TaskUpdateInput) {
-        return this.databaseService.task.update({where: {id}, data: updateTaskDto})
-      }
-    
-/*
-    async delete(id: number) {
-        const removedTask = this.findOne(id)
-
-        this.tasks = this.tasks.filter(task => task.id !== id)
-
-        return removedTask
+  async delete(id: number) {
+    try {
+      const result = await this.databaseService.task.delete({
+        where: { id },
+      });
+      return { message: 'Task deleted successfully' };
+    } catch (error) {
+      throw new NotFoundException('Error deleting task');
     }
-*/
-
-    async delete(id: number) {
-        return this.databaseService.task.delete({where: {id}})
-    }
+  }
 }
