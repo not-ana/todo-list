@@ -28,15 +28,15 @@ model User {
   name      String
   email     String    @unique
   password  String
-  taskList  TaskList[]
+  //taskList  TaskList[]
 }
 
 model TaskList {
   id        Int       @id @default(autoincrement())
   title     String
-  tasks     Task[]
-  userId    Int       // Change the type of `userId` to `Int`
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  //tasks     Task[]
+  //userId    Int       // Change the type of `userId` to `Int`
+  //user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Task {
@@ -44,7 +44,7 @@ model Task {
   description  String
   isCompleted  Boolean
   taskListId   Int       // Change the type of `taskListId` to `Int`
-  taskList     TaskList @relation(fields: [taskListId], references: [id], onDelete: Cascade)
+  //taskList     TaskList @relation(fields: [taskListId], references: [id], onDelete: Cascade)
 }
 
 

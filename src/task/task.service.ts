@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { DatabaseService } from 'src/database/database.service';
+
 
 @Injectable()
 export class TaskService {
+    constructor(private readonly databaseService: DatabaseService) {}
+    
+    /*
     private tasks = [
         {
             "id": 1,
@@ -27,10 +30,10 @@ export class TaskService {
             "isCompleted": false,
         }
     ]
+    */
 
-
-    findAll() {
-        return this.tasks
+    async findAll() {
+        return this.databaseService.task.findMany()
     }
 
     /*
@@ -41,18 +44,22 @@ export class TaskService {
     }
     */
 
-
-    findOne(id: number){
+/*
+    async findOne(id: number){
         const task = this.tasks.find(task => task.id === id)
         
         if (!task) throw new NotFoundException('Tarefa não encontrada')
 
         return task
     }
+*/
 
+    async findOne(id: number) {
+    return this.databaseService.task.findUnique({where: {id}})
+  }
 
-/*
-    create(createTaskDto: CreateTaskDto) {
+    /*
+    async create(createTaskDto: Prisma.TaskCreateInput) {
         const tasksByHightestId = [...this.tasks].sort((a,b) => b.id = a.id)
         const newTask = {
             id: tasksByHightestId[0].id + 1,
@@ -61,9 +68,17 @@ export class TaskService {
         this.tasks.push(newTask)
         return newTask
     }
-*/
-    
-    update(id: number, updateTaskDto: UpdateTaskDto) {
+
+  */  
+
+    async create(createTaskDto: Prisma.TaskCreateInput) {
+        return this.databaseService.task.create({
+          data: createTaskDto
+        })
+    }
+
+/*
+    async update(id: number, updateTaskDto: UpdateTaskDto) {
         this.tasks = this.tasks.map(task => {
             if (task.id === id){
                 return { ...task, ...updateTaskDto }
@@ -73,13 +88,23 @@ export class TaskService {
 
         return this.findOne(id)
     }
-    
 
-    delete(id: number) {
+*/
+    async update(id: number, updateTaskDto: Prisma.TaskUpdateInput) {
+        return this.databaseService.task.update({where: {id}, data: updateTaskDto})
+      }
+    
+/*
+    async delete(id: number) {
         const removedTask = this.findOne(id)
 
         this.tasks = this.tasks.filter(task => task.id !== id)
 
         return removedTask
+    }
+*/
+
+    async delete(id: number) {
+        return this.databaseService.task.delete({where: {id}})
     }
 }
